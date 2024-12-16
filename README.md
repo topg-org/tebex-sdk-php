@@ -31,7 +31,7 @@ Composer will install these extensions automatically. If installing manually, en
 ## Examples
 
 ### Headless API
-Headless allows interaction with your Tebex webstore using pre-defined packages. This API does not require any prior approval. See a more in-depth [example script here](example/headless.php).
+Headless allows interaction with your Tebex project using pre-defined packages. This API does not require any prior approval. See a more in-depth [example script here](example/headless.php).
 
 ```php
 $project = Headless::setProject("publicToken"); // Authorize headless using your public token
@@ -51,14 +51,14 @@ if ($project->requiresUserAuth()) {
 }
 
 // Add packages to the authorized basket
-$basket->addPackage($packges[0])
+$basket->addPackage($packages[0])
 
 // Direct the user to checkout
 echo "Checkout at: " . $basket->getLinks()->getCheckout();
 ```
 ### Webhooks
 
-Webhooks are send to authorized endpoints configured within your Tebex panel. They contain information about events that occur in your webstore such as payments, refunds, and disputes.
+Webhooks are sent to authorized endpoints configured within your Tebex creator panel. They contain information about events that occur in your project such as payments, refunds, and disputes.
 
 **Note:** The secret key must be your **webhook key** provided at [https://creator.tebex.io/webhooks/endpoints](https://creator.tebex.io/webhooks/endpoints)
 ```php
