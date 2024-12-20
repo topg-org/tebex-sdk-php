@@ -1,7 +1,17 @@
 {
   "name": "tebex/tebex-sdk-php",
-  "version": "1.0.0",
+  "description": "Gaming payments done right - Tebex is the monetization platform designed to grow your gaming revenue streams",
+  "keywords": [
+    "payments",
+    "payment processing",
+    "gaming",
+    "game development",
+    "api",
+    "sdk"
+  ],
+  "license": "MIT",
   "require": {
+    "php": ">=7.4",
     "ext-json": "*",
     "ext-curl": "*",
     "guzzlehttp/guzzle": "^7.9"

@@ -151,3 +151,20 @@ $basket = Checkout::checkoutRequest($builder, [$package1->buildCheckoutItem()]);
 echo "Checkout at: " . $basket->getLinks()->getCheckout();
 ```
 
+### ❓ API Documentation
+
+Our APIs are fully documented at https://docs.tebex.io/developers as a resource for all options, events, and advanced functionality possible through Tebex.
+
+## 🔗 Useful Links
+
+- [Tebex API Documentation](https://docs.tebex.io/developers)
+- [Headless API Documentation](https://docs.tebex.io/developers/headless-api/overview)
+- [Checkout API Documentation](https://docs.tebex.io/developers/checkout-api/overview)
+
+## Contributions
+
+This SDK is open source and we welcome contributions from the community. If you wish to make a contribution, please review **CONTRIBUTING.md** for guidelines and things to know before making your contribution.
+
+## 🙋‍♂️ Support
+
+For issues relating to this library, please raise an issue in its repository. Otherwise you may also contact [tebex-integrations@tebex.io](mailto:tebex-integrations@tebex.io).
