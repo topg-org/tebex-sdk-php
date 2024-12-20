@@ -31,30 +31,47 @@ Composer will install these extensions automatically. If installing manually, en
 ## Examples
 
 ### Headless API
-Headless allows interaction with your Tebex project using pre-defined packages. This API does not require any prior approval. See a more in-depth [example script here](example/headless.php).
+Headless allows interaction with your Tebex project using pre-defined packages and is available for all stores.
 
 ```php
-$project = Headless::setProject("publicToken"); // Authorize headless using your public token
+$project = Headless::setProject("your-public-token");
 
-// Interact with the store/project through $project
-$categories = $project->listCategories();   // array of Category
-$packages = $project->listPackages();       // array of Package
+// Interact with the project through $project
+$categories = $project->listCategories();
+$packages = $project->listPackages();
+$project->getCategory(12345);
+$project->getPackage(67890);
 
-// Create a basket through the $project
+// Create baskets through the project, providing completion and cancellation urls
 $basket = $project->createBasket("https://tebex.io/completed", "https://tebex.io/cancelled");
 
-// Authorize the user before adding packages (not required for Universal stores)
+// If the project requires auth, direct the user to authorize before adding packages
 if ($project->requiresUserAuth()) {
     $authUrl = $project->getUserAuthUrl($basket, "https://tebex.io/auth-return");
-    
-    // send the user to the auth URL
+    echo "- User auth required at: " . $authUrl . ".\n";
 }
 
-// Add packages to the authorized basket
-$basket->addPackage($packages[0])
+// Once user is successfully authed we can add packages via $basket
+$package = $packages[0];
 
-// Direct the user to checkout
-echo "Checkout at: " . $basket->getLinks()->getCheckout();
+$basket = $basket->addPackage($package);
+$basket = $basket->addGiftedPackage($package, "Tebex");
+$basket = $basket->addGiftCardPackage($package, "tebex-integrations@overwolf.com");
+
+// You can also add variable data as needed per each package
+$basket->addPackage($package, [
+    "server_id" => "127244"
+]);
+
+// Each function returns the remote basket after completion, but you can always request the current basket from the API
+$basket = $basket->refreshBasket();
+
+// Query the $basket object for any info
+echo "Price: $" . $basket->getBasePrice() . "\n";
+
+// Go to checkout
+$checkoutLink = $basket->getLinks()->getCheckout();
+echo "Checkout at: " . $checkoutLink;
 ```
 ### Webhooks
 
@@ -63,36 +80,33 @@ Webhooks are sent to authorized endpoints configured within your Tebex creator p
 **Note:** The secret key must be your **webhook key** provided at [https://creator.tebex.io/webhooks/endpoints](https://creator.tebex.io/webhooks/endpoints)
 ```php
 // You must set your secret key first so that webhooks can be validated.
-Webhooks::setSecretKey("your-webhook-secret-key");
+Webhooks::setSecretKey("2248c2227ac29e5cbdbab44ed6a0f961");
 
-// Is read from php://input unless an argument is provided.
-// The signing signature and IP will be automatically validated.
+// Is read from php://input unless an argument is provided
 $webhook = Webhook::parse();
 
-// To register your webhook endpoint you must respond to the validation webhook with its ID
+// You can check for specific webhook types
 if ($webhook->isType(\Tebex\Webhook\VALIDATION_WEBHOOK)) {
-    return json_encode(["id" => $webhook->getId()]);
+    echo json_encode(["id" => $webhook->getId()]); // Respond to validation endpoint
 }
 
-// Otherwise you can check for specific types or groups of types
-if ($webhook->isType(\Tebex\Webhook\PAYMENT_DECLINED)) {
-    // handle payment declined
-}
-else if ($webhook->isTypeOfPayment() || $webhook->isTypeOfDispute()){
-    // The "payment subject" contains data about the webhook action
-    $pmtSubject = $webhook->getSubject(); // PaymentSubject
-    
-    // interact with payment subject
+// You can quickly check the type of webhook with helper functions as well
+else if ($webhook->isTypeOfPayment() || $webhook->isTypeOfDispute())
+{
+    // The "subject" contains data about the webhook action
+    $pmtSubject = $webhook->getSubject(); // type is \TebexCheckout\Model\PaymentSubject
+    // etc....
 }
 else if ($webhook->isTypeOfRecurringPayment()) {
-    $recurringPmtSubject = $webhook->getSubject(); // RecurringPaymentSubject
-    
-    // interact with recurring payment subject
+    $recurringPmtSubject = $webhook->getSubject(); // \TebexCheckout\Model\RecurringPaymentSubject
+    // etc...
 }
 ```
 
 ### Checkout API
-The Checkout API allows creation of ad-hoc products without being defined as a webstore package. This API requires prior approval. See [an example script here](/example/checkout.php).
+The Checkout API allows collecting payment for ad-hoc products not defined in a Tebex project.
+
+This API requires prior approval. Please contact Tebex support to enable on your account.
 
 ```php
 // Authorize your store using your API keys
@@ -102,20 +116,24 @@ Checkout::setApiKeys("projectId", "privateKey");
 #### Creating Baskets
 Use the `Checkout\BasketBuilder` to create and manage your baskets.
 ```php
+// Use the BasketBuilder to create your basket for Checkout
 $builder = Checkout\BasketBuilder::new()
-    ->email("support@tebex.io")->firstname("Tebex")->lastname("Support")
-    ->ip($_SERVER["REMOTE_ADDR"])
-    ->returnUrl("https://tebex.io/")->completeUrl("https://tebex.io/");
+    ->email("tebex-integrations@overwolf.com")
+    ->firstname("Tebex")
+    ->lastname("Integrations")
+    ->ip("127.0.0.1") // provide client IP if running on your backend server
+    ->returnUrl("https://tebex.io/")
+    ->completeUrl("https://tebex.io/");
 ```
+
 #### Adding Packages
 Use the `Checkout\PackageBuilder` to create the packages you wish to add to your basket.
 ```php
-// one-time products
-$package1 = Checkout\PackageBuilder::new()->name("100 Gold")->qty(1)->price(1.27)->oneTime();
-
-// subscription product, each 1 month
+$package1 = Checkout\PackageBuilder::new()->name("100 Gold")->qty(1)->price(1.27)
+    ->oneTime();
+    
 $package2 = Checkout\PackageBuilder::new()->name("1 Month Sub")->qty(1)->price(2.44)
-    ->monthly()->expiryLength(1);
+    ->subscription()->monthly()->expiryLength(1);
 ```
 #### Checkout Request (Recommended)
 You can use `Checkout::checkoutRequest` to send basket information and its products in a single request. The list
@@ -132,3 +150,4 @@ $basket = Checkout::checkoutRequest($builder, [$package1->buildCheckoutItem()]);
 
 echo "Checkout at: " . $basket->getLinks()->getCheckout();
 ```
+

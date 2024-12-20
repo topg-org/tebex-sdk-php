@@ -15,8 +15,7 @@ $builder = Checkout\BasketBuilder::new()
     ->completeUrl("https://tebex.io/");
 
 // Use the PackageBuilder to create packages.
-$package1 = Checkout\PackageBuilder::new()->name("100 Gold")->qty(1)->price(1.27)
-    ->oneTime();
+$package1 = Checkout\PackageBuilder::new()->name("100 Gold")->qty(1)->price(1.27)->oneTime();
 $package2 = Checkout\PackageBuilder::new()->name("1 Month Sub")->qty(1)->price(2.44)
     ->subscription()->monthly()->expiryLength(1);
 
