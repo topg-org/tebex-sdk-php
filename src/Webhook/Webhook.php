@@ -8,7 +8,7 @@ use Tebex\Webhooks;
 use TebexCheckout\ApiException;
 use TebexCheckout\Model\PaymentSubject;
 use TebexCheckout\Model\RecurringPaymentSubject;
-use ValueError;
+use InvalidArgumentException;
 
 /**
  * Base class inherited by all webhooks. Create a webhook instance using Webhook::fromJson() with the received JSON data
@@ -52,7 +52,7 @@ class Webhook {
         $this->_rawJson = $rawJson;
         $decodedJson = json_decode($rawJson, true);
         if (!$decodedJson) {
-            throw new ValueError("Invalid or malformed webhook JSON: " . $rawJson);
+            throw new InvalidArgumentException("Invalid or malformed webhook JSON: " . $rawJson);
         }
 
         $this->_encodedJson = json_encode($decodedJson);
@@ -62,7 +62,7 @@ class Webhook {
 
         $encodedSubject = json_encode($decodedJson["subject"]);
         if (!$encodedSubject) {
-            throw new ValueError("Invalid or malformed webhook subject: " . $decodedJson["subject"]);
+            throw new InvalidArgumentException("Invalid or malformed webhook subject: " . $decodedJson["subject"]);
         }
 
         $decodedSubjectObject = json_decode($encodedSubject);
@@ -96,7 +96,7 @@ class Webhook {
      *
      * @return self An instance of the appropriate webhook class based on the provided type.
      *
-     * @throws ValueError When JSON is invalid, malformed or unrecognized webhook, or invalid/missing webhook signature
+     * @throws InvalidArgumentException When JSON is invalid, malformed or unrecognized webhook, or invalid/missing webhook signature
      * @throws ApiException
      */
     public static function parse(string $webhookJsonStr=null) : self {
@@ -105,41 +105,41 @@ class Webhook {
 
         // check for signature header
         if (!array_key_exists("X-Signature", $_SERVER)) {
-            throw new ValueError("X_SIGNATURE header is missing from the request");
+            throw new InvalidArgumentException("X_SIGNATURE header is missing from the request");
         }
         $signature = $_SERVER["X-Signature"];
 
         // decode the received json
         $decodedJson = json_decode($json, true);
         if (!$decodedJson) {
-            throw new ValueError("Invalid or malformed webhook JSON: " . $json);
+            throw new InvalidArgumentException("Invalid or malformed webhook JSON: " . $json);
         }
 
         // determine the webhook type
         $webhookType = $decodedJson['type'] ?? null;
         if (!$webhookType) {
-            throw new ValueError("Webhook type is missing from the payload: " . $json);
+            throw new InvalidArgumentException("Webhook type is missing from the payload: " . $json);
         }
 
         // ensure the webhook contains its subject
         if (!array_key_exists("subject", $decodedJson)) {
-            throw new ValueError("Webhook is missing subject from the payload: " . $json);
+            throw new InvalidArgumentException("Webhook is missing subject from the payload: " . $json);
         }
 
         $webhookSubject = $decodedJson['subject'];
         if (is_null($webhookSubject)) {
-            throw new ValueError("Webhook subject is null in payload: " . $json);
+            throw new InvalidArgumentException("Webhook subject is null in payload: " . $json);
         }
 
         // ensure the webhook is of a recognized type
         if (!array_key_exists($webhookType, WEBHOOK_TYPES)) {
-            throw new ValueError("Unrecognized webhook type: " . $webhookType);
+            throw new InvalidArgumentException("Unrecognized webhook type: " . $webhookType);
         }
 
         // lookup and hydrate the appropriate class based on our received type
         $webhookClass = WEBHOOK_TYPES[$webhookType];
         if (!class_exists($webhookClass)) {
-            throw new ValueError("Webhook class for type '$webhookType' does not exist: " . $webhookClass);
+            throw new InvalidArgumentException("Webhook class for type '$webhookType' does not exist: " . $webhookClass);
         }
 
         // instantiate the appropriate webhook class
@@ -210,7 +210,7 @@ class Webhook {
 
     public function isType(string $type): bool {
         if (!key_exists($type, WEBHOOK_TYPES)) {
-            throw new ValueError("Invalid webhook type: " . $type);
+            throw new InvalidArgumentException("Invalid webhook type: " . $type);
         }
         return $this->_type == $type;
     }
@@ -230,7 +230,7 @@ class Webhook {
     public function validateIp(string $ipHeaderName = "Cf-Connecting-Ip"): bool
     {
         if (!array_key_exists($ipHeaderName, $_SERVER)) {
-            throw new ValueError("IP header not present: " . $ipHeaderName);
+            throw new InvalidArgumentException("IP header not present: " . $ipHeaderName);
         }
         $requestIp = $_SERVER[$ipHeaderName];
         return $requestIp == "18.209.80.3" || $requestIp == "54.87.231.232";

@@ -6,7 +6,7 @@ use Tebex\Checkout;
 use TebexCheckout\ApiException;
 use TebexCheckout\Model\Basket;
 use TebexCheckout\Model\CreateBasketRequest;
-use ValueError;
+use InvalidArgumentException;
 
 /**
  * Builds baskets for Checkout API. This should be used to create, validate, and manage baskets.
@@ -45,7 +45,7 @@ class BasketBuilder
      * Builds the basket, creating it remotely on Tebex.
      *
      * @return Basket The newly created Basket instance.
-     * @throws ApiException | ValueError
+     * @throws ApiException | InvalidArgumentException
      */
     public function build(): Basket
     {
@@ -66,7 +66,7 @@ class BasketBuilder
             $missingParams[] = 'lastname';
         }
         if (!empty($missingParams)) {
-            throw new ValueError("The following required basket parameters are missing: " . implode(', ', $missingParams));
+            throw new InvalidArgumentException("The following required basket parameters are missing: " . implode(', ', $missingParams));
         }
 
         $basketCreateData = [];

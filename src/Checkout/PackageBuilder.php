@@ -4,7 +4,7 @@ namespace Tebex\Checkout;
 
 use TebexCheckout\Model\CheckoutItem;
 use TebexCheckout\Model\Package;
-use ValueError;
+use InvalidArgumentException;
 
 /**
  * Builds packages for Checkout API. Allows you to define the name, price, quantity, etc. for bespoke packages not defined
@@ -49,7 +49,7 @@ class PackageBuilder
      * Builds the package as a Package, which is the model more appropriate for display. Required parameters are automatically validated.
      *
      * @return Package
-     * @throws ValueError A required parameter is missing from the package builder.
+     * @throws InvalidArgumentException A required parameter is missing from the package builder.
      */
     public function buildPackage(): Package
     {
@@ -77,7 +77,7 @@ class PackageBuilder
         }
 
         if (!empty($missingParams)) {
-            throw new ValueError("The following required package parameters are missing or invalid: " . implode(', ', $missingParams));
+            throw new InvalidArgumentException("The following required package parameters are missing or invalid: " . implode(', ', $missingParams));
         }
 
         $packageCreateData = [
@@ -179,7 +179,7 @@ class PackageBuilder
                 $this->_expiryPeriod = $expiryPeriod;
                 break;
             default:
-                throw new ValueError("Invalid expiry period: " . $expiryPeriod . ". Must be 'month', 'year' or 'day'.");
+                throw new InvalidArgumentException("Invalid expiry period: " . $expiryPeriod . ". Must be 'month', 'year' or 'day'.");
         }
         return $this;
     }
