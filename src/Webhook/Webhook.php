@@ -104,10 +104,10 @@ class Webhook {
         $json = $webhookJsonStr == null ? file_get_contents("php://input") : $webhookJsonStr;
 
         // check for signature header
-        if (!array_key_exists("X-Signature", $_SERVER)) {
+        if (!array_key_exists("HTTP_X_SIGNATURE", $_SERVER)) {
             throw new InvalidArgumentException("X_SIGNATURE header is missing from the request");
         }
-        $signature = $_SERVER["X-Signature"];
+        $signature = $_SERVER["HTTP_X_SIGNATURE"];
 
         // decode the received json
         $decodedJson = json_decode($json, true);
