@@ -55,7 +55,8 @@ class Webhook {
         $this->_rawJson = $rawJson;
         $decodedJson = json_decode($rawJson, true);
         if (!$decodedJson) {
-            throw new InvalidArgumentException("Invalid or malformed webhook JSON: " . $rawJson);
+            $jsonError = json_last_error_msg();
+            throw new InvalidArgumentException("Invalid or malformed webhook JSON: " . $rawJson. " Error: " . $jsonError);
         }
 
         $this->_encodedJson = json_encode($decodedJson);
