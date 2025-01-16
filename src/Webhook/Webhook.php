@@ -104,10 +104,10 @@ class Webhook {
         $json = $webhookJsonStr == null ? file_get_contents("php://input") : $webhookJsonStr;
 
         // check for signature header
-        if (!array_key_exists("HTTP_X_SIGNATURE", $_SERVER)) {
+        if (!array_key_exists("X-Signature", $_SERVER)) {
             throw new ValueError("X_SIGNATURE header is missing from the request");
         }
-        $signature = $_SERVER["HTTP_X_SIGNATURE"];
+        $signature = $_SERVER["X-Signature"];
 
         // decode the received json
         $decodedJson = json_decode($json, true);
@@ -227,7 +227,7 @@ class Webhook {
      * @param $ipHeaderName string The name of the header containing the requestor's IP
      * @return bool True if the request IP matches a Tebex IP
      */
-    public function validateIp(string $ipHeaderName = "REMOTE_ADDR"): bool
+    public function validateIp(string $ipHeaderName = "Cf-Connecting-Ip"): bool
     {
         if (!array_key_exists($ipHeaderName, $_SERVER)) {
             throw new ValueError("IP header not present: " . $ipHeaderName);
