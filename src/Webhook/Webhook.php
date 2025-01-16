@@ -20,7 +20,7 @@ class Webhook {
     /**
      * @var string The JSON data provided at initialization (not expected to be encoded)
      */
-    protected string $_rawJson;
+    protected ?string $_rawJson;
 
     /**
      * @var string The $_rawJson data which has been decoded and then re-encoded. This is expected to remove any
