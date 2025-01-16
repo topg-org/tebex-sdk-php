@@ -49,6 +49,9 @@ class Webhook {
     private object $_subject;
 
     private function __construct($rawJson) {
+        if (empty($rawJson) || !is_string($rawJson)) {
+            throw new InvalidArgumentException("Webhook JSON is empty or invalid." . $rawJson);
+        }
         $this->_rawJson = $rawJson;
         $decodedJson = json_decode($rawJson, true);
         if (!$decodedJson) {
