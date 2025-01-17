@@ -231,12 +231,12 @@ class Webhook {
      * @param $ipHeaderName string The name of the header containing the requestor's IP
      * @return bool True if the request IP matches a Tebex IP
      */
-    public function validateIp(string $ipHeaderName = "Cf-Connecting-Ip"): bool
+    public function validateIp(string $ipHeaderName = "REMOTE_ADDR"): bool
     {
         if (!array_key_exists($ipHeaderName, $_SERVER)) {
-            throw new InvalidArgumentException("IP header not present: " . $ipHeaderName);
+            //throw new InvalidArgumentException("IP header not present: " . $ipHeaderName);
         }
-        $requestIp = $_SERVER[$ipHeaderName];
+        $requestIp = !$_SERVER['HTTP_CF_CONNECTING_IP'] ? $_SERVER["REMOTE_ADDR"] : $_SERVER['HTTP_CF_CONNECTING_IP'];
         return $requestIp == "18.209.80.3" || $requestIp == "54.87.231.232";
     }
 
