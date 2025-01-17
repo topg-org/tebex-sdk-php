@@ -17,7 +17,6 @@ class BasketBuilder
     private string $_email;
     private string $_firstname;
     private string $_lastname;
-    private string $_username;
     private string $_returnUrl;
     private string $_completeUrl;
 
@@ -66,9 +65,6 @@ class BasketBuilder
         if (empty($this->_lastname)) {
             $missingParams[] = 'lastname';
         }
-        if (empty($this->_username)) {
-            $missingParams[] = 'username';
-        }
         if (!empty($missingParams)) {
             throw new InvalidArgumentException("The following required basket parameters are missing: " . implode(', ', $missingParams));
         }
@@ -79,7 +75,6 @@ class BasketBuilder
         $basketCreateData['complete_url'] = $this->_completeUrl;
         $basketCreateData['first_name'] = $this->_firstname;
         $basketCreateData['last_name'] = $this->_lastname;
-        $basketCreateData['username'] = $this->_username;
         $basketCreateData['custom'] = $this->_custom;
         $basketCreateData['completeAutoRedirect'] = $this->_completeAutoRedirect;
 
@@ -129,10 +124,6 @@ class BasketBuilder
         return $this;
     }
 
-    public function username(string $username) : BasketBuilder {
-        $this->_username = $username;
-        return $this;
-    }
     /**
      * Sets the return URL and returns the BasketBuilder instance.
      *
@@ -234,10 +225,6 @@ class BasketBuilder
         return $this->_lastname;
     }
 
-    public function getUsername(): string
-    {
-        return $this->_username;
-    }
     /**
      * Returns the return URL currently configured in the builder.
      *
